@@ -10,7 +10,6 @@ import os, inspect, time, sys, getopt, glob
 from datetime import datetime
 import traceback
 import pdb
-
 from __future__ import print_function
 # Imported scipy and matplotlib modules
 import scipy as sp
