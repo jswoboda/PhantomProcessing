@@ -58,8 +58,9 @@ if __name__ == "__main__":
     argv = sys.argv[1:]
     outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir>'
     funcdict = {'spectrums':makespectrums, 'radardata':makeradardata}
+    #pdb.set_trace()
     try:
-        opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+        opts, args = getopt.getopt(argv,"hf:i:o:n:")
     except getopt.GetoptError:
         print(outstr)
         sys.exit(2)
@@ -77,6 +78,8 @@ if __name__ == "__main__":
             outdir = arg
         elif opt in ("-f", "--func"):
             curfunc = funcdict[arg]
+	elif opt in ('-n', "--num"):
+	    npts = int(arg)
 
     if not outdirexist:
         outdir = inputdir
@@ -84,14 +87,15 @@ if __name__ == "__main__":
     full_path = os.path.realpath(__file__)
     path, file = os.path.split(full_path)
 
-    dfullfile = os.path.join(path,dfilename)
+    dfullfilestr = os.path.join(path,dfilename)
+    dfullfile= open(dfullfilestr,'w')
     print(inputsep,file=dfullfile)
     print(curfunc.__name__+'\n',file=dfullfile)
     print(time.asctime()+'\n',file=dfullfile)
 
     try:
         stime = datetime.now()
-        curfunc(inputdir,outdir,[sensdict] +args)
+        curfunc(inputdir,outdir,[sensdict,npts])
         ftime = datetime.now()
         ptime = ftime-stime
         print('Success!\n',file=dfullfile)
@@ -101,6 +105,6 @@ if __name__ == "__main__":
         traceback.print_exc(file=sys.stdout)
         traceback.print_exc(file = dfullfile)
     print(inputsep,file=dfullfile)
-
+    dfullfile.close()
 
 
