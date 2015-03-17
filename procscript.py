@@ -7,6 +7,7 @@ Created on Mon Mar 16 12:14:42 2015
 
 #imported basic modules
 import os, inspect, time, sys, getopt, glob
+from datetime import datetime
 import traceback
 import pdb
 
@@ -89,8 +90,12 @@ if __name__ == "__main__":
     print(time.asctime()+'\n',file=dfullfile)
 
     try:
+        stime = datetime.now()
         curfunc(inputdir,outdir,[sensdict] +args)
+        ftime = datetime.now()
+        ptime = ftime-stime
         print('Success!\n',file=dfullfile)
+        print('Duration: {}'.format(ptime),file=dfullfile)
     except Exception, e:
         print('Failed!\n',file=dfullfile)
         traceback.print_exc(file=sys.stdout)
