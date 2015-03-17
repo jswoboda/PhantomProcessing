@@ -41,7 +41,8 @@ def makespectrums(inputdir,outputdir,optinputs):
         curiono = IonoContainer.readmat(curfile)
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
 
-#def makeradardata(inputdir,outputdir,optinputs):
+def makeradardata(inputdir,outputdir,optinputs):
+    return () 
 #def fittdata(inputdir,outputdir,optinputs):
 
 def ke(item):
