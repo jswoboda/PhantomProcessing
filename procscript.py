@@ -4,13 +4,13 @@ Created on Mon Mar 16 12:14:42 2015
 
 @author: John Swoboda
 """
+from __future__ import print_function
 
 #imported basic modules
 import os, inspect, time, sys, getopt, glob
 from datetime import datetime
 import traceback
 import pdb
-from __future__ import print_function
 # Imported scipy and matplotlib modules
 import scipy as sp
 from matplotlib import rc
