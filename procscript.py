@@ -19,7 +19,7 @@ import matplotlib.pylab as plt
 from RadarDataSim.IonoContainer import IonoContainer
 from RadarDataSim.radarData import RadarData
 import RadarDataSim.specfunctions as specfuncs
-from RadarDataSim.const import sensconst
+import RadarDataSim.const.sensorConstants as sensconst
 
 def makespectrums(inputdir,outputdir,optinputs):
 
