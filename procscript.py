@@ -25,7 +25,7 @@ def makespectrums(inputdir,outputdir,optinputs):
 
     dirlist = glob.glob(os.path.join(inputdir,'*.mat'))
     numlist = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist]
-    numdict = {numlist[i]:dirlist[i] for i in arange(len(dirlist))}
+    numdict = {numlist[i]:dirlist[i] for i in range(len(dirlist))}
     slist = sorted(numlist,key=ke)
 
     sensdict = optinputs[0]
@@ -39,14 +39,16 @@ def makespectrums(inputdir,outputdir,optinputs):
         outfile = os.path.join(outputdir,inum+'  spectrum.h5')
         curfile = numdict[inum]
         curiono = IonoContainer.readmat(curfile)
-        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts)
+        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
 
-def makeradardata(inputdir,outputdir,optinputs):
-
-def fittdata(inputdir,outputdir,optinputs):
+#def makeradardata(inputdir,outputdir,optinputs):
+#def fittdata(inputdir,outputdir,optinputs):
 
 def ke(item):
-    return (int(item.partition(' ')[0]) if item[0].isdigit() else float('inf'), item))
+    if item[0].isdigit():
+        return int(item.partition(' ')[0])
+    else:
+        return float('inf')
 
 
 if __name__ == "__main__":
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     inputsep = '***************************************************************\n'
     argv = sys.argv[1:]
     outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir>'
-    funcdict = {'spectrums':makespectrums, 'radardata':makeradardata,}
+    funcdict = {'spectrums':makespectrums, 'radardata':makeradardata}
     try:
         opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
     except getopt.GetoptError:
@@ -62,7 +64,7 @@ if __name__ == "__main__":
         sys.exit(2)
 
 
-    outdirexit = False
+    outdirexist = False
     for opt, arg in opts:
         if opt == '-h':
             print(outstr)
@@ -70,24 +72,24 @@ if __name__ == "__main__":
         elif opt in ("-i", "--ifile"):
             inputdir = arg
         elif opt in ("-o", "--ofile"):
-            outdirexit = True
+            outdirexist = True
             outdir = arg
         elif opt in ("-f", "--func"):
-            curfunc = functdict[arg]
+            curfunc = funcdict[arg]
 
     if not outdirexist:
         outdir = inputdir
-    sensdict = sensconst.getConst('risr',ang_data)
+    sensdict = sensconst.getConst('risr')
     full_path = os.path.realpath(__file__)
     path, file = os.path.split(full_path)
 
     dfullfile = os.path.join(path,dfilename)
     print(inputsep,file=dfullfile)
-    print(curfunct.__name__+'\n',file=dfullfile)
+    print(curfunc.__name__+'\n',file=dfullfile)
     print(time.asctime()+'\n',file=dfullfile)
 
     try:
-        func(inputdir,outputdir,[sensdict] +args)
+        curfunc(inputdir,outdir,[sensdict] +args)
         print('Success!\n',file=dfullfile)
     except Exception, e:
         print('Failed!\n',file=dfullfile)
