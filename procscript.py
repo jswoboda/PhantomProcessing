@@ -34,17 +34,18 @@ def makespectrums(inputdir,outputdir,optinputs):
         npts = 128
     else:
         npts = int(optinputs[1])
-
+    coordlims = {'x':[-300,-300],'y':[-300,300],'z':[0,700]}
     for inum in slist:
         outfile = os.path.join(outputdir,inum+' spectrum.h5')
         curfile = numdict[inum]
         curiono = IonoContainer.readmat(curfile)
+        curiono.coordreduce(coordlims)
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
 
 def makeradardata(inputdir,outputdir,optinputs):
     return ()
-#def fittdata(inputdir,outputdir,optinputs):
-
+def fitdata(inputdir,outputdir,optinputs):
+    return ()
 def ke(item):
     if item[0].isdigit():
         return int(item.partition(' ')[0])
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     inputsep = '***************************************************************\n'
     argv = sys.argv[1:]
     outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir> -n <number of samples>'
-    funcdict = {'spectrums':makespectrums, 'radardata':makeradardata}
+    funcdict = {'spectrums':makespectrums, 'radardata':makeradardata, 'fitting':fitdata}
     #pdb.set_trace()
     try:
         opts, args = getopt.getopt(argv,"hf:i:o:n:")
