@@ -39,7 +39,7 @@ def makespectrums(inputdir,outputdir,optinputs):
 
         outfile = os.path.join(outputdir,inum+' spectrum.h5')
         curfile = numdict[inum]
-        print('Processing file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.datetime.now()))
+        print('Processing file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
         curiono = IonoContainer.readmat(curfile)
         curiono.coordreduce(coordlims)
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
