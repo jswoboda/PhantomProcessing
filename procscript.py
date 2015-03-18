@@ -88,7 +88,7 @@ if __name__ == "__main__":
     path, file = os.path.split(full_path)
 
     dfullfilestr = os.path.join(path,dfilename)
-    f= open(dfullfilestr,'w')
+    f= open(dfullfilestr,'a')
     f.write(inputsep)
     f.write(curfunc.__name__+'\n')
     f.write(time.asctime()+'\n')
@@ -100,11 +100,15 @@ if __name__ == "__main__":
         ptime = ftime-stime
         f.write('Success!\n')
         f.write('Duration: {}\n'.format(ptime))
+        f.write('Input directory: {}\n'.format(inputdir))
+        f.write('Output directory: {}\n'.format(outdir))
     except Exception, e:
         f.write('Failed!\n')
         ftime = datetime.now()
         ptime = ftime-stime
         f.write('Duration: {}\n'.format(ptime))
+        f.write('Input directory: {}\n'.format(inputdir))
+        f.write('Output directory: {}\n'.format(outdir))
         traceback.print_exc(file=sys.stdout)
         traceback.print_exc(file = f)
     f.write(inputsep)
