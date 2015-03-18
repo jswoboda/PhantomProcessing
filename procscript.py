@@ -36,7 +36,7 @@ def makespectrums(inputdir,outputdir,optinputs):
         npts = int(optinputs[1])
 
     for inum in slist:
-        outfile = os.path.join(outputdir,inum+'  spectrum.h5')
+        outfile = os.path.join(outputdir,inum+' spectrum.h5')
         curfile = numdict[inum]
         curiono = IonoContainer.readmat(curfile)
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
@@ -99,9 +99,12 @@ if __name__ == "__main__":
         ftime = datetime.now()
         ptime = ftime-stime
         f.write('Success!\n')
-        f.write('Duration: {}'.format(ptime))
+        f.write('Duration: {}\n'.format(ptime))
     except Exception, e:
         f.write('Failed!\n')
+        ftime = datetime.now()
+        ptime = ftime-stime
+        f.write('Duration: {}\n'.format(ptime))
         traceback.print_exc(file=sys.stdout)
         traceback.print_exc(file = f)
     f.write(inputsep)
