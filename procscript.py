@@ -42,7 +42,7 @@ def makespectrums(inputdir,outputdir,optinputs):
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
 
 def makeradardata(inputdir,outputdir,optinputs):
-    return () 
+    return ()
 #def fittdata(inputdir,outputdir,optinputs):
 
 def ke(item):
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     dfilename = 'diary.txt'
     inputsep = '***************************************************************\n'
     argv = sys.argv[1:]
-    outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir>'
+    outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir> -n <number of samples>'
     funcdict = {'spectrums':makespectrums, 'radardata':makeradardata}
     #pdb.set_trace()
     try:
@@ -88,23 +88,23 @@ if __name__ == "__main__":
     path, file = os.path.split(full_path)
 
     dfullfilestr = os.path.join(path,dfilename)
-    dfullfile= open(dfullfilestr,'w')
-    print(inputsep,file=dfullfile)
-    print(curfunc.__name__+'\n',file=dfullfile)
-    print(time.asctime()+'\n',file=dfullfile)
+    f= open(dfullfilestr,'w')
+    f.write(inputsep)
+    f.write(curfunc.__name__+'\n')
+    f.write(time.asctime()+'\n')
 
     try:
         stime = datetime.now()
         curfunc(inputdir,outdir,[sensdict,npts])
         ftime = datetime.now()
         ptime = ftime-stime
-        print('Success!\n',file=dfullfile)
-        print('Duration: {}'.format(ptime),file=dfullfile)
+        f.write('Success!\n')
+        f.write('Duration: {}'.format(ptime))
     except Exception, e:
-        print('Failed!\n',file=dfullfile)
+        f.write('Failed!\n')
         traceback.print_exc(file=sys.stdout)
-        traceback.print_exc(file = dfullfile)
-    print(inputsep,file=dfullfile)
-    dfullfile.close()
+        traceback.print_exc(file = f)
+    f.write(inputsep)
+    f.close()
 
 
