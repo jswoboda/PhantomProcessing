@@ -36,10 +36,10 @@ def makespectrums(inputdir,outputdir,optinputs):
         npts = int(optinputs[1])
 
     for inum in slist:
-        outfile = os.path.join(outputdir,inum+'  spectrum.h5')
+        outfile = os.path.join(outputdir,inum+'  spectrum.mat')
         curfile = numdict[inum]
         curiono = IonoContainer.readmat(curfile)
-        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
+        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).savemat(outfile)
 
 def makeradardata(inputdir,outputdir,optinputs):
     return ()
