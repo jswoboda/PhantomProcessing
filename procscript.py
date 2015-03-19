@@ -34,7 +34,7 @@ def makespectrums(inputdir,outputdir,optinputs):
         npts = 128
     else:
         npts = int(optinputs[1])
-    coordlims = {'x':[-300,-300],'y':[-300,300],'z':[0,700]}
+    coordlims = {'x':[-300,300],'y':[-300,300],'z':[0,700]}
     for inum in slist:
 
         outfile = os.path.join(outputdir,inum+' spectrum.h5')
