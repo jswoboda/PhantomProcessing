@@ -13,6 +13,7 @@ import traceback
 import pdb
 # Imported scipy and matplotlib modules
 import scipy as sp
+import scipy.io as sio
 from matplotlib import rc
 import matplotlib.pylab as plt
 # My modules
@@ -20,7 +21,8 @@ from RadarDataSim.IonoContainer import IonoContainer
 from RadarDataSim.radarData import RadarData
 import RadarDataSim.specfunctions as specfuncs
 import RadarDataSim.const.sensorConstants as sensconst
-
+from RadarDataSim.const.physConstants import v_C_0, v_Boltz
+from beamtools.bcotools import getangles
 def makespectrums(inputdir,outputdir,optinputs):
 
     dirlist = glob.glob(os.path.join(inputdir,'*.mat'))
@@ -34,7 +36,7 @@ def makespectrums(inputdir,outputdir,optinputs):
         npts = 128
     else:
         npts = int(optinputs[1])
-    coordlims = {'x':[-300,-300],'y':[-300,300],'z':[0,700]}
+    coordlims = {'x':[-300,300],'y':[-300,300],'z':[0,700]}
     for inum in slist:
 
         outfile = os.path.join(outputdir,inum+' spectrum.h5')
@@ -45,6 +47,28 @@ def makespectrums(inputdir,outputdir,optinputs):
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
         print('Finished file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
 def makeradardata(inputdir,outputdir,optinputs):
+    sensdict = optinputs[0]
+    pulse = np.ones(14)
+    rng_lims = [150,500]
+    IPP = .0087
+    angles = getangles('spcorbco.txt')
+    Tint=3.0*60.0
+    time_lim = 900.0+Tint
+    NNs = 28
+    NNp = 100
+    rng_gates = sp.arange(rng_lims[0],rng_lims[1],sensdict['t_s']*v_C_0*1e-3)
+    simparams =   {'IPP':IPP,'angles':angles,'TimeLim':time_lim,'Pulse':pulse,\
+    'Timevec':sp.arange(0,time_lim,Tint),'Tint':Tint,'Rangegates':rng_gates,\
+    'Noisesamples': NNs,'Noisepulses':NNp}
+    dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
+    timelist = [int(item.partition(' ')[0]) for item in dirlist]
+    Ionodict = {timelist[it]:dirlist[it] for it in range(len(dirlist))}
+
+    rdata = RadarData(Ionodict,sensdict,simparams)
+    timearr = sp.linspace(0.0,time_lim,num=220)
+    (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
+    sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
+    sio.savemat(os.path.join(outputdir,'Noisedata.mat'),mdict=NoiseLags)
     return ()
 def fitdata(inputdir,outputdir,optinputs):
     return ()
