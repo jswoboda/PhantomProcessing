@@ -48,7 +48,7 @@ def makespectrums(inputdir,outputdir,optinputs):
         print('Finished file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
 def makeradardata(inputdir,outputdir,optinputs):
     sensdict = optinputs[0]
-    pulse = np.ones(14)
+    pulse = sp.ones(14)
     rng_lims = [150,500]
     IPP = .0087
     angles = getangles('spcorbco.txt')
