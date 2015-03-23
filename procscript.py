@@ -61,7 +61,8 @@ def makeradardata(inputdir,outputdir,optinputs):
     'Timevec':sp.arange(0,time_lim,Tint),'Tint':Tint,'Rangegates':rng_gates,\
     'Noisesamples': NNs,'Noisepulses':NNp}
     dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
-    timelist = [int(item.partition(' ')[0]) for item in dirlist]
+    filelist = [os.path.split(item)[1] for item in dirlist]
+    timelist = [int(item.partition(' ')[0]) for item in filelist]
     Ionodict = {timelist[it]:dirlist[it] for it in range(len(dirlist))}
 
     rdata = RadarData(Ionodict,sensdict,simparams)
