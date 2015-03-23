@@ -65,7 +65,7 @@ def makeradardata(inputdir,outputdir,optinputs):
     timelist = [int(item.partition(' ')[0]) for item in filelist]
     Ionodict = {timelist[it]:dirlist[it] for it in range(len(dirlist))}
 
-    rdata = RadarData(Ionodict,sensdict,simparams)
+    rdata = RadarData(Ionodict,sensdict,simparams=simparams)
     timearr = sp.linspace(0.0,time_lim,num=220)
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
     sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
