@@ -52,6 +52,8 @@ def makeradardata(inputdir,outputdir,optinputs):
     rng_lims = [150,500]
     IPP = .0087
     angles = getangles('spcorbco.txt')
+    ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
+    sensdict = sensconst.getConst('risr',ang_data)
     Tint=3.0*60.0
     time_lim = 900.0+Tint
     NNs = 28
