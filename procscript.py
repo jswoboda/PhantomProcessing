@@ -18,7 +18,7 @@ from matplotlib import rc
 import matplotlib.pylab as plt
 # My modules
 from RadarDataSim.IonoContainer import IonoContainer
-from RadarDataSim.radarData import RadarData
+from RadarDataSim.radarData import RadarData, RadarDataFile
 import RadarDataSim.specfunctions as specfuncs
 import RadarDataSim.const.sensorConstants as sensconst
 from RadarDataSim.const.physConstants import v_C_0, v_Boltz
@@ -56,18 +56,19 @@ def makeradardata(inputdir,outputdir,optinputs):
     sensdict = sensconst.getConst('risr',ang_data)
     Tint=3.0*60.0
     time_lim = 900.0+Tint
+
     NNs = 28
     NNp = 100
     rng_gates = sp.arange(rng_lims[0],rng_lims[1],sensdict['t_s']*v_C_0*1e-3)
     simparams =   {'IPP':IPP,'angles':angles,'TimeLim':time_lim,'Pulse':pulse,\
     'Timevec':sp.arange(0,time_lim,Tint),'Tint':Tint,'Rangegates':rng_gates,\
-    'Noisesamples': NNs,'Noisepulses':NNp}
+    'Noisesamples': NNs,'Noisepulses':NNp,'dtype':sp.complex128}
     dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
     filelist = [os.path.split(item)[1] for item in dirlist]
     timelist = [int(item.partition(' ')[0]) for item in filelist]
     Ionodict = {timelist[it]:dirlist[it] for it in range(len(dirlist))}
 
-    rdata = RadarData(Ionodict,sensdict,simparams=simparams)
+    rdata = RadarDataFile(Ionodict,sensdict,simparams=simparams)
     timearr = sp.linspace(0.0,time_lim,num=220)
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
     sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
