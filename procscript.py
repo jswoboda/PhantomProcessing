@@ -67,14 +67,14 @@ def makeradardata(inputdir,outputdir,optinputs):
     filelist = [os.path.split(item)[1] for item in dirlist]
     timelist = [int(item.partition(' ')[0]) for item in filelist]
     Ionodict = {timelist[it]:dirlist[it] for it in range(len(dirlist))}
-    
+
     dirlist2 = glob.glob(os.path.join(outputdir,'*.h5'))
     numlist2 = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist2]
     numdict2 = {numlist2[i]:dirlist2[i] for i in range(len(dirlist2))}
-    slist2 = sorted(numlist2,key=ke)    
+    slist2 = sorted(numlist2,key=ke)
     outlist2 = [numdict2[ikey] for ikey in slist2]
 
-    rdata = RadarDataFile(Ionodict,sensdict,simparams,outputdir,outfilelist=outlist2)
+    rdata = RadarDataFile(Ionodict,sensdict,simparams,outputdir,outfilelist=None)
     timearr = sp.linspace(0.0,time_lim,num=220)
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
     sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
