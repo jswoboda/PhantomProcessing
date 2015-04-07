@@ -23,6 +23,10 @@ import RadarDataSim.specfunctions as specfuncs
 import RadarDataSim.const.sensorConstants as sensconst
 from RadarDataSim.const.physConstants import v_C_0, v_Boltz
 from beamtools.bcotools import getangles
+from RadarDataSim.utilFunctions import make_amb
+from RadarDataSim.specfunctions import ISRSfitfunction
+from RadarDataSim.fitterMethodGen import Fitterionoconainer
+
 def makespectrums(inputdir,outputdir,optinputs):
 
     dirlist = glob.glob(os.path.join(inputdir,'*.mat'))
@@ -47,13 +51,13 @@ def makespectrums(inputdir,outputdir,optinputs):
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
         print('Finished file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
 def makeradardata(inputdir,outputdir,optinputs):
-    sensdict = optinputs[0]
+
     pulse = sp.ones(14)
     rng_lims = [150,500]
     IPP = .0087
     angles = getangles('spcorbco.txt')
     ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
-    sensdict = sensconst.getConst('risr',ang_data)
+    sensdict = sensconst.getConst('pfisr',ang_data)
     Tint=3.0*60.0
     time_lim = 900.0+Tint
 
@@ -63,6 +67,9 @@ def makeradardata(inputdir,outputdir,optinputs):
     simparams =   {'IPP':IPP,'angles':angles,'TimeLim':time_lim,'Pulse':pulse,\
     'Timevec':sp.arange(0,time_lim,Tint),'Tint':Tint,'Rangegates':rng_gates,\
     'Noisesamples': NNs,'Noisepulses':NNp,'dtype':sp.complex128}
+    simparams['SUMRULE'] = sp.array([[-2,-3,-3,-4,-4,-5,-5,-6,-6,-7,-7,-8,-8,-9],[1,1,2,2,3,3,4,4,5,5,6,6,7,7]])
+    simparams['amb_dict'] = make_amb(sensdict['fs'],30,sensdict['t_s']*len(pulse),len(pulse))
+
     dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
     filelist = [os.path.split(item)[1] for item in dirlist]
     timelist = [int(item.partition(' ')[0]) for item in filelist]
@@ -79,12 +86,42 @@ def makeradardata(inputdir,outputdir,optinputs):
 
     rdata = RadarDataFile(Ionodict,sensdict,simparams,outputdir,outfilelist=outlist2)
     timearr = sp.linspace(0.0,time_lim,num=220)
+    ionoout = rdata.processdataiono(timearr,Tint)
+    ionoout.readh5(os.path.join(outputdir,'00lags.h5'))
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
     sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
     sio.savemat(os.path.join(outputdir,'Noisedata.mat'),mdict=NoiseLags)
     return ()
 def fitdata(inputdir,outputdir,optinputs):
+    dirlist = glob.glob(os.path.join(inputdir,'*.lagsh5'))
+
+    # Species in matlab format 1=O+,2=NO+,3=N2+,4=O2+,5=N+, 6=H+,7=e-
+    # kept 1,2,4,6,7
+    pulse = sp.ones(14)
+    rng_lims = [150,500]
+    IPP = .0087
+    angles = getangles('spcorbco.txt')
+    ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
+    sensdict = sensconst.getConst('pfisr',ang_data)
+    Tint=3.0*60.0
+    time_lim = 900.0+Tint
+
+    NNs = 28
+    NNp = 100
+    rng_gates = sp.arange(rng_lims[0],rng_lims[1],sensdict['t_s']*v_C_0*1e-3)
+    simparams =   {'IPP':IPP,'angles':angles,'TimeLim':time_lim,'Pulse':pulse,\
+    'Timevec':sp.arange(0,time_lim,Tint),'Tint':Tint,'Rangegates':rng_gates,\
+    'Noisesamples': NNs,'Noisepulses':NNp,'dtype':sp.complex128}
+    simparams['SUMRULE'] = sp.array([[-2,-3,-3,-4,-4,-5,-5,-6,-6,-7,-7,-8,-8,-9],[1,1,2,2,3,3,4,4,5,5,6,6,7,7]])
+    simparams['amb_dict'] = make_amb(sensdict['fs'],30,sensdict['t_s']*len(pulse),len(pulse))
+
+    species = ['O+','NO+','O2+','e-']
+    sensdict['species'] = species
+    Ionoin=IonoContainer.readh5(dirlist[0])
+    fitterone = Fitterionoconainer(Ionoin,sensdict,simparams)
+    (fitteddata,fittederror) = fitterone.fitdata(ISRSfitfunction,startvalfunc)
     return ()
+#%% For stuff
 def ke(item):
     if item[0].isdigit():
         return int(item.partition(' ')[0])
