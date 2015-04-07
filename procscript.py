@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     if not outdirexist:
         outdir = inputdir
-    sensdict = sensconst.getConst('risr')
+    sensdict = sensconst.getConst('pfisr')
     full_path = os.path.realpath(__file__)
     path, file = os.path.split(full_path)
 
