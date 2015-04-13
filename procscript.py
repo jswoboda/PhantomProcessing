@@ -16,6 +16,7 @@ import scipy as sp
 import scipy.io as sio
 from matplotlib import rc
 import matplotlib.pylab as plt
+import tables
 # My modules
 from RadarDataSim.IonoContainer import IonoContainer
 from RadarDataSim.radarData import RadarData, RadarDataFile
@@ -93,7 +94,7 @@ def makeradardata(inputdir,outputdir,optinputs):
     sio.savemat(os.path.join(outputdir,'Noisedata.mat'),mdict=NoiseLags)
     return ()
 def fitdata(inputdir,outputdir,optinputs):
-    dirlist = glob.glob(os.path.join(inputdir,'*.lagsh5'))
+    dirlist = glob.glob(os.path.join(inputdir,'*lags.h5'))
 
     # Species in matlab format 1=O+,2=NO+,3=N2+,4=O2+,5=N+, 6=H+,7=e-
     # kept 1,2,4,6,7
@@ -120,7 +121,43 @@ def fitdata(inputdir,outputdir,optinputs):
     Ionoin=IonoContainer.readh5(dirlist[0])
     fitterone = Fitterionoconainer(Ionoin,sensdict,simparams)
     (fitteddata,fittederror) = fitterone.fitdata(ISRSfitfunction,startvalfunc)
+    (Nloc,Ntimes,nparams)=fitteddata.shape
+    fittederronly = fittederror[:,:,range(nparams),range(nparams)]
+    paramlist = sp.concatenate((fitteddata,fittederronly),axis=2)
+    paramnames = []
+    for isp in species[:-1]:
+        paramnames.append('Ni_'+isp)
+        paramnames.append('Ti_'+isp)
+    paramnames = paramnames+['Ne','Te','Vi']
+    paramnamese = ['n'+ip for ip in paramnames]
+    paranamsf = sp.array(paramnames+paramnamese)
+
+
+    Ionoout=IonoContainer(Ionoin.Sphere_Coords,paramlist,Ionoin.Time_Vector,coordvecs = Ionoin.Coord_Vecs, paramnames=paranamsf,species=species)
+
+    Ionoout.saveh5(os.path.join(outputdir,'fitteddatasphere.h5'))
+
     return ()
+def startvalfunc(Ne_init, loc,time,exinputs):
+    """ """
+    h5file = tables.openFile('avedata.h5')
+    zdata = h5file.root.zkm.read()
+    datast = h5file.root.stdata.read()
+    vel = h5file.root.velocity.read()
+    numel =sp.prod(datast[-2:]) +1
+
+    xarray = sp.zeros((loc.shape[0],numel))
+    for ilocn, iloc in enumerate(loc):
+        indx = sp.argmin(sp.absolute(zdata-iloc[2]))
+        xarray[ilocn,:-1]=sp.reshape(datast[indx,0],numel-1)
+        locmag = sp.sqrt(sp.sum(iloc*iloc))
+        xarray[ilocn,-1] = vel[indx,0]*iloc/locmag
+
+    xarray = sp.repeat(xarray[:,sp.newaxis,:],(1,len(time),1))
+
+
+    return xarray
+
 #%% For stuff
 def ke(item):
     if item[0].isdigit():
