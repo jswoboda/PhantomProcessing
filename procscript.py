@@ -88,7 +88,7 @@ def makeradardata(inputdir,outputdir,optinputs):
     rdata = RadarDataFile(Ionodict,sensdict,simparams,outputdir,outfilelist=outlist2)
     timearr = sp.linspace(0.0,time_lim,num=220)
     ionoout = rdata.processdataiono(timearr,Tint)
-    ionoout.readh5(os.path.join(outputdir,'00lags.h5'))
+    ionoout.saveh5(os.path.join(outputdir,'00lags.h5'))
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
     sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
     sio.savemat(os.path.join(outputdir,'Noisedata.mat'),mdict=NoiseLags)
