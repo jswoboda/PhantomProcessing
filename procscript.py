@@ -92,6 +92,7 @@ def makeradardata(inputdir,outputdir,optinputs):
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
     sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
     sio.savemat(os.path.join(outputdir,'Noisedata.mat'),mdict=NoiseLags)
+    
     return ()
 def fitdata(inputdir,outputdir,optinputs):
     dirlist = glob.glob(os.path.join(inputdir,'*lags.h5'))
@@ -164,7 +165,7 @@ def ke(item):
         return int(item.partition(' ')[0])
     else:
         return float('inf')
-
+#%% Main function
 
 if __name__ == "__main__":
     dfilename = 'diary.txt'
