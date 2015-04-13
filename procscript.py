@@ -137,7 +137,7 @@ def fitdata(inputdir,outputdir,optinputs):
 
     Ionoout.saveh5(os.path.join(outputdir,'fitteddatasphere.h5'))
 
-    return ()
+#%% fit function stuff
 def startvalfunc(Ne_init, loc,time,exinputs):
     """ """
     h5file = tables.openFile('avedata.h5')
