@@ -12,6 +12,7 @@ Created on Mon Apr  6 15:07:16 2015
 @author: John Swoboda
 """
 import os, inspect
+import pdb
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import AxesGrid
@@ -34,22 +35,23 @@ if __name__ == "__main__":
     dataloc = Iono.Cart_Coords
     velocity = Iono.Velocity
     zlist,idx = sp.unique(dataloc[:,2],return_inverse=True)
-    siz = list(dataloc.shape[1:])
+    siz = list(Param_List.shape[1:])
+    vsiz = list(velocity.shape[1:])
 
     outdata = sp.zeros([len(zlist)]+siz)
-    outvel = sp.zeros_like(outdata)
+    outvel = sp.zeros([len(zlist)]+vsiz)
 
     for izn,iz in enumerate(zlist):
         arr = sp.argwhere(idx==izn)
-        outdata=sp.mean(Param_List[arr],axis=0)
-        outvec=sp.mean(velocity[arr],axis=0)
+        outdata[izn]=sp.mean(Param_List[arr],axis=0)
+        outvel[izn]=sp.mean(velocity[arr],axis=0)
 
     h5file=tables.openFile('avedata.h5',mode = "w", title = "Ave data")
 
     h5file.createArray('/', 'stdata',outdata,'Static array')
     h5file.createArray('/', 'zkm',zlist,'Static array')
     h5file.createArray('/', 'names',Iono.Param_Names,'Static array')
-    h5file.createArray('/','velocity',outvec,'Static array')
+    h5file.createArray('/','velocity',outvel,'Static array')
     h5file.close()
 
 

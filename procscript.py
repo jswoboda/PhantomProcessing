@@ -92,7 +92,7 @@ def makeradardata(inputdir,outputdir,optinputs):
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
     sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
     sio.savemat(os.path.join(outputdir,'Noisedata.mat'),mdict=NoiseLags)
-    
+
     return ()
 def fitdata(inputdir,outputdir,optinputs):
     dirlist = glob.glob(os.path.join(inputdir,'*lags.h5'))
@@ -145,16 +145,15 @@ def startvalfunc(Ne_init, loc,time,exinputs):
     zdata = h5file.root.zkm.read()
     datast = h5file.root.stdata.read()
     vel = h5file.root.velocity.read()
-    numel =sp.prod(datast[-2:]) +1
+    numel =sp.prod(datast.shape[-2:]) +1
 
     xarray = sp.zeros((loc.shape[0],numel))
     for ilocn, iloc in enumerate(loc):
         indx = sp.argmin(sp.absolute(zdata-iloc[2]))
         xarray[ilocn,:-1]=sp.reshape(datast[indx,0],numel-1)
         locmag = sp.sqrt(sp.sum(iloc*iloc))
-        xarray[ilocn,-1] = vel[indx,0]*iloc/locmag
-
-    xarray = sp.repeat(xarray[:,sp.newaxis,:],(1,len(time),1))
+        xarray[ilocn,-1] = sp.sum(vel[indx,0]*iloc)/locmag
+    xarray = sp.repeat(xarray[:,sp.newaxis,:],len(time),axis=1)
 
 
     return xarray
@@ -182,6 +181,7 @@ if __name__ == "__main__":
 
 
     outdirexist = False
+    nptsexist = False
     for opt, arg in opts:
         if opt == '-h':
             print(outstr)
@@ -198,6 +198,8 @@ if __name__ == "__main__":
 
     if not outdirexist:
         outdir = inputdir
+    if not nptsexist:
+        npts = 128
     sensdict = sensconst.getConst('pfisr')
     full_path = os.path.realpath(__file__)
     path, file = os.path.split(full_path)
