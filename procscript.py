@@ -86,7 +86,7 @@ def makeradardata(inputdir,outputdir,optinputs):
         outlist2 = None
 
     rdata = RadarDataFile(Ionodict,sensdict,simparams,outputdir,outfilelist=outlist2)
-    timearr = sp.linspace(0.0,time_lim,num=220)
+    timearr = sp.linspace(0.0,time_lim,num=19*3-2)
     ionoout = rdata.processdataiono(timearr,Tint)
     ionoout.saveh5(os.path.join(outputdir,'00lags.h5'))
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
@@ -120,6 +120,7 @@ def fitdata(inputdir,outputdir,optinputs):
     species = ['O+','NO+','O2+','e-']
     sensdict['species'] = species
     Ionoin=IonoContainer.readh5(dirlist[0])
+
     fitterone = Fitterionoconainer(Ionoin,sensdict,simparams)
     (fitteddata,fittederror) = fitterone.fitdata(ISRSfitfunction,startvalfunc)
     (Nloc,Ntimes,nparams)=fitteddata.shape
@@ -134,7 +135,7 @@ def fitdata(inputdir,outputdir,optinputs):
     paranamsf = sp.array(paramnames+paramnamese)
 
 
-    Ionoout=IonoContainer(Ionoin.Sphere_Coords,paramlist,Ionoin.Time_Vector,coordvecs = Ionoin.Coord_Vecs, paramnames=paranamsf,species=species)
+    Ionoout=IonoContainer(Ionoin.Sphere_Coords,paramlist,Ionoin.Time_Vector,ver =1,coordvecs = Ionoin.Coord_Vecs, paramnames=paranamsf,species=species)
 
     Ionoout.saveh5(os.path.join(outputdir,'fitteddatasphere.h5'))
 
