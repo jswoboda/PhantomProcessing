@@ -57,9 +57,10 @@ def makeradardata(inputdir,outputdir,optinputs):
     pulse = sp.ones(14)
     rng_lims = [150,500]
     IPP = .0087
-    angles = getangles('linelist.txt')
+    radar = 'pfisr'
+    angles = getangles('linelist.txt',radar)
     ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
-    sensdict = sensconst.getConst('pfisr',ang_data)
+    sensdict = sensconst.getConst(radar,ang_data)
     Tint=3.0*60.0
     time_lim = 900.0+Tint
 
@@ -103,7 +104,7 @@ def fitdata(inputdir,outputdir,optinputs):
     pulse = sp.ones(14)
     rng_lims = [150,500]
     IPP = .0087
-    angles = getangles('spcorbco.txt')
+    angles = getangles('linelist.txt')
     ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
     sensdict = sensconst.getConst('pfisr',ang_data)
     Tint=3.0*60.0
@@ -169,7 +170,7 @@ def ke(item):
 #%% Main function
 
 if __name__ == "__main__":
-    dfilename = 'diary.txt'
+    dfilename = 'diaryline.txt'
     inputsep = '***************************************************************\n'
     argv = sys.argv[1:]
     outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir> -n <number of samples>'
