@@ -48,6 +48,8 @@ def makespectrums(inputdir,outputdir,optinputs):
         curfile = numdict[inum]
         print('Processing file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
         curiono = IonoContainer.readmat(curfile)
+        if curiono.Time_Vector[0]==1e-6:
+            curiono.Time_Vector[0] = 0.0
         curiono.coordreduce(coordlims)
         curiono.saveh5(os.path.join(inputdir,inum+'red.h5'))
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
@@ -57,11 +59,11 @@ def makeradardata(inputdir,outputdir,optinputs):
     pulse = sp.ones(14)
     rng_lims = [150,500]
     IPP = .0087
-    radar = 'risr'
+    radar = 'pfisr'
     angles = getangles('spcorbco.txt',radar)
     ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
     sensdict = sensconst.getConst(radar,ang_data)
-    Tint=3.0*60.0
+    Tint=4.0*60.0
     time_lim = 900.0+Tint
 
     NNs = 28
@@ -88,7 +90,7 @@ def makeradardata(inputdir,outputdir,optinputs):
         outlist2 = None
 
     rdata = RadarDataFile(Ionodict,sensdict,simparams,outputdir,outfilelist=outlist2)
-    timearr = sp.linspace(0.0,time_lim,num=19*3-2)
+    timearr = sp.linspace(0.0,time_lim,20*2-1)
     ionoout = rdata.processdataiono(timearr,Tint)
     ionoout.saveh5(os.path.join(outputdir,'00lags.h5'))
     (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
@@ -104,11 +106,11 @@ def fitdata(inputdir,outputdir,optinputs):
     pulse = sp.ones(14)
     rng_lims = [150,500]
     IPP = .0087
-    radar = 'risr'
+    radar = 'pfisr'
     angles = getangles('spcorbco.txt',radar)
     ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
     sensdict = sensconst.getConst(radar,ang_data)
-    Tint=3.0*60.0
+    Tint=4.0*60.0
     time_lim = 900.0+Tint
 
     NNs = 28
