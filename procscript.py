@@ -30,7 +30,7 @@ from RadarDataSim.fitterMethodGen import Fitterionoconainer
 
 def makespectrums(inputdir,outputdir,optinputs):
 
-    dirlist = glob.glob(os.path.join(inputdir,'*red.h5'))
+    dirlist = glob.glob(os.path.join(inputdir,'*.mat'))
     numlist = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist]
     numdict = {numlist[i]:dirlist[i] for i in range(len(dirlist))}
     slist = sorted(numlist,key=ke)
@@ -41,17 +41,17 @@ def makespectrums(inputdir,outputdir,optinputs):
         npts = 128
     else:
         npts = int(optinputs[1])
-#    coordlims = {'x':[-300,300],'y':[-300,300],'z':[0,700]}
+    coordlims = {'x':[-300,300],'y':[-300,300],'z':[0,700]}
     for inum in slist:
 
         outfile = os.path.join(outputdir,inum+' spectrum.h5')
         curfile = numdict[inum]
         print('Processing file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
-        curiono = IonoContainer.readh5(curfile)
-#        if curiono.Time_Vector[0]==1e-6:
-#            curiono.Time_Vector[0] = 0.0
-#        curiono.coordreduce(coordlims)
-#        curiono.saveh5(os.path.join(inputdir,inum+'red.h5'))
+        curiono = IonoContainer.readmat(curfile)
+        if curiono.Time_Vector[0]==1e-6:
+            curiono.Time_Vector[0] = 0.0
+        curiono.coordreduce(coordlims)
+        curiono.saveh5(os.path.join(inputdir,inum+' red.h5'))
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
         print('Finished file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
 def makeradardata(inputdir,outputdir,optinputs):
