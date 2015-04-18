@@ -125,7 +125,6 @@ def fitdata(inputdir,outputdir,optinputs):
     species = ['O+','NO+','O2+','e-']
     sensdict['species'] = species
     Ionoin=IonoContainer.readh5(dirlist[0])
-    Ionoin.timereduce(timesselected=0)
     fitterone = Fitterionoconainer(Ionoin,sensdict,simparams)
     (fitteddata,fittederror) = fitterone.fitdata(ISRSfitfunction,startvalfunc)
     (Nloc,Ntimes,nparams)=fitteddata.shape
@@ -142,7 +141,7 @@ def fitdata(inputdir,outputdir,optinputs):
 
     Ionoout=IonoContainer(Ionoin.Sphere_Coords,paramlist,Ionoin.Time_Vector,ver =1,coordvecs = Ionoin.Coord_Vecs, paramnames=paranamsf,species=species)
 
-    Ionoout.saveh5(os.path.join(outputdir,'fitteddatasphereinit2.h5'))
+    Ionoout.saveh5(os.path.join(outputdir,'fitteddataspherepenalty.h5'))
 
 #%% fit function stuff
 def startvalfunc(Ne_init, loc,time,exinputs):
