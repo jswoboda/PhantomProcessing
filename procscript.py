@@ -13,66 +13,41 @@ import traceback
 import pdb
 # Imported scipy and matplotlib modules
 import scipy as sp
-import scipy.io as sio
-f
 import tables
 # My modules
 from RadarDataSim.IonoContainer import IonoContainer
-from RadarDataSim.radarData import RadarData, RadarDataFile
+from RadarDataSim.radarData import RadarDataFile
 import RadarDataSim.specfunctions as specfuncs
-import RadarDataSim.const.sensorConstants as sensconst
-from RadarDataSim.const.physConstants import v_C_0, v_Boltz
-from beamtools.bcotools import getangles
-from RadarDataSim.utilFunctions import make_amb
 from RadarDataSim.specfunctions import ISRSfitfunction
 from RadarDataSim.fitterMethodGen import Fitterionoconainer
+from RadarDataSim.makeConfigFiles import readconfigfile
 
-def makespectrums(inputdir,outputdir,optinputs):
+
+def makespectrums(inputdir,outputdir,configfile,optintputs):
 
     dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
     numlist = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist]
     numdict = {numlist[i]:dirlist[i] for i in range(len(dirlist))}
     slist = sorted(numlist,key=ke)
 
-    sensdict = optinputs[0]
+    (sensdict,simparams) = readconfigfile(configfile)
 
-    if len(optinputs)<2:
-        npts = 128
-    else:
-        npts = int(optinputs[1])
 #    coordlims = {'x':[-300,300],'y':[-300,300],'z':[0,700]}
     for inum in slist:
 
         outfile = os.path.join(outputdir,inum+' spectrum.h5')
         curfile = numdict[inum]
-        print('Processing file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
+        print('Processing file {} starting at {}\n'.format(os.path.split(curfile)[1]
+            ,datetime.now()))
         curiono = IonoContainer.readh5(curfile)
         if curiono.Time_Vector[0]==1e-6:
             curiono.Time_Vector[0] = 0.0
 #        curiono.coordreduce(coordlims)
 #        curiono.saveh5(os.path.join(inputdir,inum+' red.h5'))
-        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
+        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,
+                                     simparams['numpoints']).saveh5(outfile)
         print('Finished file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
-def makeradardata(inputdir,outputdir,optinputs):
-
-    pulse = sp.ones(14)
-    rng_lims = [150,500]
-    IPP = .0087
-    radar = 'pfisr'
-    angles = getangles('spcorbco.txt',radar)
-    ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
-    sensdict = sensconst.getConst(radar,ang_data)
-    Tint=4.0*60.0
-    time_lim = 900.0+Tint
-
-    NNs = 28
-    NNp = 100
-    rng_gates = sp.arange(rng_lims[0],rng_lims[1],sensdict['t_s']*v_C_0*1e-3)
-    simparams =   {'IPP':IPP,'angles':angles,'TimeLim':time_lim,'Pulse':pulse,\
-    'Timevec':sp.arange(0,time_lim,Tint),'Tint':Tint,'Rangegates':rng_gates,\
-    'Noisesamples': NNs,'Noisepulses':NNp,'dtype':sp.complex128}
-    simparams['SUMRULE'] = sp.array([[-2,-3,-3,-4,-4,-5,-5,-6,-6,-7,-7,-8,-8,-9],[1,1,2,2,3,3,4,4,5,5,6,6,7,7]])
-    simparams['amb_dict'] = make_amb(sensdict['fs'],30,sensdict['t_s']*len(pulse),len(pulse))
+def makeradardata(inputdir,outputdir,configfile,optintputs):
 
     dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
     filelist = [os.path.split(item)[1] for item in dirlist]
@@ -88,49 +63,25 @@ def makeradardata(inputdir,outputdir,optinputs):
     else:
         outlist2 = None
 
-    rdata = RadarDataFile(Ionodict,sensdict,simparams,outputdir,outfilelist=outlist2)
-    timearr = sp.linspace(0.0,time_lim,20*2-1)
-    ionoout = rdata.processdataiono(timearr,Tint)
+    rdata = RadarDataFile(Ionodict,configfile,outputdir,outfilelist=outlist2)
+    ionoout = rdata.processdataiono()
     ionoout.saveh5(os.path.join(outputdir,'00lags.h5'))
-    (DataLags,NoiseLags) = rdata.processdata(timearr,Tint)
-    sio.savemat(os.path.join(outputdir,'ACFdata.mat'),mdict=DataLags)
-    sio.savemat(os.path.join(outputdir,'Noisedata.mat'),mdict=NoiseLags)
 
     return ()
-def fitdata(inputdir,outputdir,optinputs):
+
+def fitdata(inputdir,outputdir,configfile,optintputs):
     dirlist = glob.glob(os.path.join(inputdir,'*lags.h5'))
 
-    # Species in matlab format 1=O+,2=NO+,3=N2+,4=O2+,5=N+, 6=H+,7=e-
-    # kept 1,2,4,6,7
-    pulse = sp.ones(14)
-    rng_lims = [150,500]
-    IPP = .0087
-    radar = 'pfisr'
-    angles = getangles('spcorbco.txt',radar)
-    ang_data = sp.array([[iout[0],iout[1]] for iout in angles])
-    sensdict = sensconst.getConst(radar,ang_data)
-    Tint=4.0*60.0
-    time_lim = 900.0+Tint
 
-    NNs = 28
-    NNp = 100
-    rng_gates = sp.arange(rng_lims[0],rng_lims[1],sensdict['t_s']*v_C_0*1e-3)
-    simparams =   {'IPP':IPP,'angles':angles,'TimeLim':time_lim,'Pulse':pulse,\
-    'Timevec':sp.arange(0,time_lim,Tint),'Tint':Tint,'Rangegates':rng_gates,\
-    'Noisesamples': NNs,'Noisepulses':NNp,'dtype':sp.complex128}
-    simparams['SUMRULE'] = sp.array([[-2,-3,-3,-4,-4,-5,-5,-6,-6,-7,-7,-8,-8,-9],[1,1,2,2,3,3,4,4,5,5,6,6,7,7]])
-    simparams['amb_dict'] = make_amb(sensdict['fs'],30,sensdict['t_s']*len(pulse),len(pulse))
-
-    species = ['O+','NO+','O2+','e-']
-    simparams['species'] = species
     Ionoin=IonoContainer.readh5(dirlist[0])
-    Ionoin.timereduce(sp.arange(0,900,60))
-    fitterone = Fitterionoconainer(Ionoin,sensdict,simparams)
+    fitterone = Fitterionoconainer(Ionoin,configfile)
     (fitteddata,fittederror) = fitterone.fitdata(ISRSfitfunction,startvalfunc)
     (Nloc,Ntimes,nparams)=fitteddata.shape
     fittederronly = fittederror[:,:,range(nparams),range(nparams)]
     paramlist = sp.concatenate((fitteddata,fittederronly),axis=2)
+
     paramnames = []
+    species = readconfigfile(configfile)[1]['species']
     for isp in species[:-1]:
         paramnames.append('Ni_'+isp)
         paramnames.append('Ti_'+isp)
@@ -170,23 +121,24 @@ def ke(item):
     else:
         return float('inf')
 #%% Main function
-
-if __name__ == "__main__":
+def main(argv):
     dfilename = 'diary.txt'
+    configfile = 'PFISRphantomprocspcor.pickle'
+
     inputsep = '***************************************************************\n'
-    argv = sys.argv[1:]
-    outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir> -n <number of samples>'
+
+    outstr = 'procscript.py -f <function: spectrums radardata or fitting> -i <inputdir> -o <outputdir> -r <type y to remake data>'
     funcdict = {'spectrums':makespectrums, 'radardata':makeradardata, 'fitting':fitdata}
     #pdb.set_trace()
     try:
-        opts, args = getopt.getopt(argv,"hf:i:o:n:")
+        opts, args = getopt.getopt(argv,"hf:i:o:r:")
     except getopt.GetoptError:
         print(outstr)
         sys.exit(2)
 
 
     outdirexist = False
-    nptsexist = False
+    remakealldata = False
     for opt, arg in opts:
         if opt == '-h':
             print(outstr)
@@ -198,14 +150,15 @@ if __name__ == "__main__":
             outdir = arg
         elif opt in ("-f", "--func"):
             curfunc = funcdict[arg]
-	elif opt in ('-n', "--num"):
-	    npts = int(arg)
+        elif opt in ('-r', "--re"):
+            if arg.lower() == 'y':
+                remakealldata = True
+
+
 
     if not outdirexist:
         outdir = inputdir
-    if not nptsexist:
-        npts = 128
-    sensdict = sensconst.getConst('pfisr')
+
     full_path = os.path.realpath(__file__)
     path, file = os.path.split(full_path)
 
@@ -217,7 +170,7 @@ if __name__ == "__main__":
 
     try:
         stime = datetime.now()
-        curfunc(inputdir,outdir,[sensdict,npts])
+        curfunc(inputdir,outdir,configfile,[remakealldata])
         ftime = datetime.now()
         ptime = ftime-stime
         f.write('Success!\n')
@@ -237,4 +190,6 @@ if __name__ == "__main__":
     f.write(inputsep)
     f.close()
 
-
+if __name__ == "__main__":
+    argv = sys.argv[1:]
+    main(argv)
