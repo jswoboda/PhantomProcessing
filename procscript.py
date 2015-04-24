@@ -7,15 +7,14 @@ Created on Mon Mar 16 12:14:42 2015
 from __future__ import print_function
 
 #imported basic modules
-import os, inspect, time, sys, getopt, glob
+import os, time, sys, getopt, glob
 from datetime import datetime
 import traceback
 import pdb
 # Imported scipy and matplotlib modules
 import scipy as sp
 import scipy.io as sio
-from matplotlib import rc
-import matplotlib.pylab as plt
+f
 import tables
 # My modules
 from RadarDataSim.IonoContainer import IonoContainer
@@ -123,8 +122,9 @@ def fitdata(inputdir,outputdir,optinputs):
     simparams['amb_dict'] = make_amb(sensdict['fs'],30,sensdict['t_s']*len(pulse),len(pulse))
 
     species = ['O+','NO+','O2+','e-']
-    sensdict['species'] = species
+    simparams['species'] = species
     Ionoin=IonoContainer.readh5(dirlist[0])
+    Ionoin.timereduce(sp.arange(0,900,60))
     fitterone = Fitterionoconainer(Ionoin,sensdict,simparams)
     (fitteddata,fittederror) = fitterone.fitdata(ISRSfitfunction,startvalfunc)
     (Nloc,Ntimes,nparams)=fitteddata.shape
@@ -159,7 +159,7 @@ def startvalfunc(Ne_init, loc,time,exinputs):
         locmag = sp.sqrt(sp.sum(iloc*iloc))
         xarray[ilocn,-1] = sp.sum(vel[indx,0]*iloc)/locmag
     xarray = sp.repeat(xarray[:,sp.newaxis,:],len(time),axis=1)
-
+    h5file.close()
 
     return xarray
 
