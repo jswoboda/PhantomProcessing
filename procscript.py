@@ -165,7 +165,7 @@ def main(argv):
 
     full_path = os.path.realpath(__file__)
     path, file = os.path.split(full_path)
-    dfilename = 'diary',+curfunc,'.txt'
+    dfilename = 'diary'+curfunc+'.txt'
     dfullfilestr = os.path.join(path,dfilename)
     f= open(dfullfilestr,'a')
     f.write(inputsep)
