@@ -21,9 +21,10 @@ import RadarDataSim.specfunctions as specfuncs
 from RadarDataSim.specfunctions import ISRSfitfunction
 from RadarDataSim.fitterMethodGen import Fitterionoconainer
 from RadarDataSim.makeConfigFiles import readconfigfile
+from turn2geodata import fit2geodata
 
-
-def makespectrums(inputdir,outputdir,configfile,optintputs):
+#%% Make spectrums
+def makespectrums(inputdir,outputdir,configfile,remakealldata):
 
     dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
     numlist = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist]
@@ -47,17 +48,19 @@ def makespectrums(inputdir,outputdir,configfile,optintputs):
         curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,
                                      simparams['numpoints']).saveh5(outfile)
         print('Finished file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
-def makeradardata(inputdir,outputdir,configfile,optintputs):
+
+#%% Make Radar Data
+def makeradardata(inputdir,outputdir,configfile,remakealldata):
 
     dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
     filelist = [os.path.split(item)[1] for item in dirlist]
     timelist = [int(item.partition(' ')[0]) for item in filelist]
     Ionodict = {timelist[it]:dirlist[it] for it in range(len(dirlist))}
 
-    dirlist2 = glob.glob(os.path.join(outputdir,'*.h5'))
-    if dirlist2:
-        numlist2 = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist2]
-        numdict2 = {numlist2[i]:dirlist2[i] for i in range(len(dirlist2))}
+    radardatalist = glob.glob(os.path.join(outputdir,'*RawData.h5'))
+    if radardatalist and (not remakealldata):
+        numlist2 = [os.path.splitext(os.path.split(x)[-1])[0] for x in radardatalist]
+        numdict2 = {numlist2[i]:radardatalist[i] for i in range(len(radardatalist))}
         slist2 = sorted(numlist2,key=ke)
         outlist2 = [numdict2[ikey] for ikey in slist2]
     else:
@@ -68,7 +71,7 @@ def makeradardata(inputdir,outputdir,configfile,optintputs):
     ionoout.saveh5(os.path.join(outputdir,'00lags.h5'))
 
     return ()
-
+#%% Fitt data
 def fitdata(inputdir,outputdir,configfile,optintputs):
     dirlist = glob.glob(os.path.join(inputdir,'*lags.h5'))
 
@@ -91,8 +94,9 @@ def fitdata(inputdir,outputdir,configfile,optintputs):
 
 
     Ionoout=IonoContainer(Ionoin.Sphere_Coords,paramlist,Ionoin.Time_Vector,ver =1,coordvecs = Ionoin.Coord_Vecs, paramnames=paranamsf,species=species)
-
-    Ionoout.saveh5(os.path.join(outputdir,'fitteddataspherepenalty.h5'))
+    outfile = os.path.join(outputdir,'fitteddataspherepenalty.h5')
+    Ionoout.saveh5(outfile)
+    fit2geodata(outfile)
 
 #%% fit function stuff
 def startvalfunc(Ne_init, loc,time,exinputs):
@@ -114,7 +118,7 @@ def startvalfunc(Ne_init, loc,time,exinputs):
 
     return xarray
 
-#%% For stuff
+#%% For sorting
 def ke(item):
     if item[0].isdigit():
         return int(item.partition(' ')[0])
@@ -170,7 +174,7 @@ def main(argv):
 
     try:
         stime = datetime.now()
-        curfunc(inputdir,outdir,configfile,[remakealldata])
+        curfunc(inputdir,outdir,configfile,remakealldata)
         ftime = datetime.now()
         ptime = ftime-stime
         f.write('Success!\n')
@@ -189,7 +193,25 @@ def main(argv):
         #pdb.set_trace()
     f.write(inputsep)
     f.close()
+def runall(basedir):
+    paramdir = os.path.join(basedir,'Origparams')
+    specdir = os.path.join(basedir,'Spectrums')
+    radardir = os.path.join(basedir,'Radardata')
+    fitdir = os.path.join(basedir,'Fitted')
+    #create spectrums
+    input1 = ['-f','spectrums','-i',paramdir,'-o',specdir,'-r','y']
+    main(input1)
+    #create radardata
+    input2 = ['-f','radardata','-i',specdir,'-o',radardir,'-r','y']
+    main(input2)
+    #create fitted data
+    input3 = ['-f','fitting','-i',radardir,'-o',fitdir,'-r','y']
+    main(input3)
 
+    return()
 if __name__ == "__main__":
     argv = sys.argv[1:]
-    main(argv)
+    if argv[0] == '-b':
+        runall(argv[1])
+    else:
+        main(argv)
