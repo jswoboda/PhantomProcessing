@@ -26,7 +26,7 @@ from turn2geodata import fit2geodata
 #%% Make spectrums
 def makespectrums(inputdir,outputdir,configfile,remakealldata):
 
-    dirlist = glob.glob(os.path.join(inputdir,'*.h5'))
+    dirlist = glob.glob(os.path.join(inputdir,'* red.h5'))
     numlist = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist]
     numdict = {numlist[i]:dirlist[i] for i in range(len(dirlist))}
     slist = sorted(numlist,key=ke)
@@ -126,7 +126,7 @@ def ke(item):
         return float('inf')
 #%% Main function
 def main(argv):
-    dfilename = 'diary.txt'
+
     configfile = 'PFISRphantomprocspcor.pickle'
 
     inputsep = '***************************************************************\n'
@@ -165,7 +165,7 @@ def main(argv):
 
     full_path = os.path.realpath(__file__)
     path, file = os.path.split(full_path)
-
+    dfilename = 'diary',+curfunc,'.txt'
     dfullfilestr = os.path.join(path,dfilename)
     f= open(dfullfilestr,'a')
     f.write(inputsep)
