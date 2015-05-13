@@ -13,20 +13,10 @@ Created on Mon Apr  6 15:07:16 2015
 """
 import os, inspect
 import pdb
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.axes_grid1 import AxesGrid
-from matplotlib import cm
-import matplotlib as mpl
-from matplotlib import ticker
-from GeoData.GeoData import GeoData
-from GeoData.utilityfuncs import readIono
 from RadarDataSim.IonoContainer import IonoContainer
-import tables
 import scipy as sp
 
-if __name__ == "__main__":
-    curpath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+def main(curpath):
 
     file_name = os.path.join(curpath,'Origparams','0.mat')
 
@@ -38,6 +28,7 @@ if __name__ == "__main__":
     siz = list(Param_List.shape[1:])
     vsiz = list(velocity.shape[1:])
 
+    datalocsave = sp.column_stack((sp.zeros_like(zlist),sp.zeros_like(zlist),zlist))
     outdata = sp.zeros([len(zlist)]+siz)
     outvel = sp.zeros([len(zlist)]+vsiz)
 
@@ -46,13 +37,11 @@ if __name__ == "__main__":
         outdata[izn]=sp.mean(Param_List[arr],axis=0)
         outvel[izn]=sp.mean(velocity[arr],axis=0)
 
-    h5file=tables.openFile('avedata.h5',mode = "w", title = "Ave data")
-
-    h5file.createArray('/', 'stdata',outdata,'Static array')
-    h5file.createArray('/', 'zkm',zlist,'Static array')
-    h5file.createArray('/', 'names',Iono.Param_Names,'Static array')
-    h5file.createArray('/','velocity',outvel,'Static array')
-    h5file.close()
+    Ionoout = IonoContainer(datalocsave,outdata,Iono.Time_Vector,Iono.Sensor_loc,ver=0,paramnmaes=Iono.Param_Names,
+                            species=Iono.Species,velocity=outvel)
+    Ionoout.saveh5('avedata.h5')
+if __name__ == "__main__":
+    main()
 
 
 
