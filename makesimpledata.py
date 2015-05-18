@@ -37,7 +37,7 @@ def main(curpath):
         outdata[izn]=sp.mean(Param_List[arr],axis=0)
         outvel[izn]=sp.mean(velocity[arr],axis=0)
 
-    Ionoout = IonoContainer(datalocsave,outdata,Iono.Time_Vector,Iono.Sensor_loc,ver=0,paramnmaes=Iono.Param_Names,
+    Ionoout = IonoContainer(datalocsave,outdata,Iono.Time_Vector,Iono.Sensor_loc,ver=0,paramnames=Iono.Param_Names,
                             species=Iono.Species,velocity=outvel)
     Ionoout.saveh5('avedata.h5')
 if __name__ == "__main__":
