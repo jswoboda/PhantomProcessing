@@ -13,7 +13,9 @@ def makepicklelongpulse(filepath):
     beamlist.astype(np.int)
     radarname = 'pfisr'
 
-    Tint=4.0*60.0
+    Tint=3.5*60.0# will give around 200 pulses
+    fittedtimeint = 60.0 # Each incriment will be
+
     time_lim = 900+Tint
     pulse = GenBarker(13)
     rng_lims = [150,500]
@@ -26,7 +28,7 @@ def makepicklelongpulse(filepath):
                    'Pulse':pulse,
                    'Pulsetype':'long',
                    'Tint':Tint,
-                   'Fitinter':Tint,
+                   'Fitinter':fittedtimeint,
                    'NNs': NNs,
                    'NNp':NNp,
                    'dtype':np.complex128,
@@ -46,7 +48,7 @@ def makepicklebarkercode(filepath):
     beamlist.astype(np.int)
     radarname = 'pfisr'
 
-    Tint=4.0*60.0
+    Tint=120 # 113 pulses
     time_lim = 900+Tint
     pulse = np.ones(14)
     rng_lims = [80,250]
@@ -71,26 +73,30 @@ def makepicklebarkercode(filepath):
 
     fname = os.path.join(filepath,'PFISRphantombarker')
     makepicklefile(fname+'.pickle',beamlist,radarname,simparams)
-    
-def makepickleline(filepath):
-    beamlist = np.loadtxt('linelist.txt')
-    beamlist.astype(np.int)
-    radarname = 'pfisr'
 
-    Tint=4.0*60.0
-    time_lim = 900+Tint
-    pulse = np.ones(14)
-    rng_lims = [150,500]
+def makepickleline(filepath):
     IPP = .0087
     NNs = 28
     NNp = 100
+
+    beamlist = np.loadtxt('linelist.txt')
+    beamlist.astype(np.int)
+    radarname = 'pfisr'
+    nbeams = len(beamlist)
+
+    Tint=30.0 # integrates right around 200 pulses
+    fittedtimeint = 30.0 # Each incriment will be
+    time_lim = 900+Tint
+    pulse = np.ones(14)
+    rng_lims = [150,500]
+
     simparams =   {'IPP':IPP,
                    'TimeLim':time_lim,
                    'RangeLims':rng_lims,
                    'Pulse':pulse,
                    'Pulsetype':'long',
                    'Tint':Tint,
-                   'Fitinter':Tint,
+                   'Fitinter':fittedtimeint,
                    'NNs': NNs,
                    'NNp':NNp,
                    'dtype':np.complex128,
@@ -110,7 +116,7 @@ def reducedata(inputdir,newcoords):
     numlist = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist]
     numdict = {numlist[i]:dirlist[i] for i in range(len(dirlist))}
     slist = sorted(numlist,key=ke)
-    
+
     #coordlims = {'x':[0,300],'y':[0,400],'z':[0,700]}
     for inum in slist:
 
@@ -118,7 +124,7 @@ def reducedata(inputdir,newcoords):
         curiono = IonoContainer.readmat(curfile)
         if curiono.Time_Vector[0]==1e-6:
             curiono.Time_Vector[0] = 0.0
-        
+
         if type(newcoords)==dict:
             curiono.coordreduce(newcoords)
         elif type(newcoords)==np.ndarray:
