@@ -22,7 +22,7 @@ if __name__ == "__main__":
         fname = os.path.splitext(os.path.split(ifile)[1])[0]
         GD.write_h5(os.path.join(outdir,fname+'.h5'))
         print('Saved '+os.path.join(outdir,fname+'.h5'))
-def fit2geodata(inputfile):
+def fit2geodata(inputfile,outfile=None):
     Ionoin=IonoContainer.readh5(inputfile)
     keep = ['Ne','Te','Ti']
     GD=GeoData(readIono,[Ionoin])
@@ -31,5 +31,17 @@ def fit2geodata(inputfile):
             del GD.data[ikey]
     indir,fnameall=os.path.split(inputfile)
     fname = os.path.splitext(fnameall)[0]
-    GD.write_h5(os.path.join(indir,fname+'GEOD.h5'))
-    print('Saved '+os.path.join(indir,fname+'.h5'))
+    if outfile is None:
+        outdir = indir
+        outname = fname+'GEOD.h5'
+    else:
+        outdir, outname = os.path.split(outfile)
+        
+    GD.write_h5(os.path.join(outdir,outname))
+    print('Saved '+os.path.join(outdir,outname))
+    
+def fit2geodatalist(inputfilelist,outfilelist=None):
+    if outfilelist is None:
+        outfilelist=[None]*len(inputfilelist)
+    for ifiles in zip(inputfilelist,outfilelist):
+        fit2geodata(ifiles[0],ifiles[1])

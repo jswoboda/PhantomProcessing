@@ -13,7 +13,7 @@ def makepicklelongpulse(filepath):
     beamlist.astype(np.int)
     radarname = 'pfisr'
 
-    Tint=3.5*60.0# will give around 200 pulses
+    Tint=5.25*60.0# will give around 300 pulses
     fittedtimeint = 60.0 # Each incriment will be
 
     time_lim = 900+Tint

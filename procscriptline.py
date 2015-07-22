@@ -19,7 +19,7 @@ import matplotlib.pylab as plt
 import tables
 # My modules
 from RadarDataSim.IonoContainer import IonoContainer
-from RadarDataSim.radarData import RadarData, RadarDataFile
+from RadarDataSim.radarData import RadarDataFile
 import RadarDataSim.specfunctions as specfuncs
 import RadarDataSim.const.sensorConstants as sensconst
 from RadarDataSim.const.physConstants import v_C_0, v_Boltz
@@ -34,7 +34,6 @@ def makespectrums(inputdir,outputdir,optinputs):
     numlist = [os.path.splitext(os.path.split(x)[-1])[0] for x in dirlist]
     numdict = {numlist[i]:dirlist[i] for i in range(len(dirlist))}
     slist = sorted(numlist,key=ke)
-
     sensdict = optinputs[0]
 
     if len(optinputs)<2:
@@ -51,8 +50,8 @@ def makespectrums(inputdir,outputdir,optinputs):
         if curiono.Time_Vector[0]==1e-6:
             curiono.Time_Vector[0] = 0.0
         curiono.coordreduce(coordlims)
-        curiono.saveh5(os.path.join(inputdir,inum+'red.h5'))
-        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
+        curiono.saveh5(os.path.join(inputdir,inum+' red.h5'))
+#        curiono.makespectruminstanceopen(specfuncs.ISRSspecmake,sensdict,npts).saveh5(outfile)
         print('Finished file {} starting at {}\n'.format(os.path.split(curfile)[1],datetime.now()))
 def makeradardata(inputdir,outputdir,optinputs):
 
