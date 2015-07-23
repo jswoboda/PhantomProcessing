@@ -4,7 +4,7 @@
 import os, inspect, glob,pdb
 import scipy as sp
 import numpy as np
-from RadarDataSim.utilFunctions import makepicklefile,GenBarker
+from RadarDataSim.utilFunctions import makeconfigfile
 from RadarDataSim.IonoContainer import IonoContainer
 import RadarDataSim.runsim as runsim
 from turn2geodata import fit2geodata
@@ -17,16 +17,16 @@ def makepicklelongpulse(filepath):
     fittedtimeint = 60.0 # Each incriment will be
 
     time_lim = 900+Tint
-    pulse = GenBarker(13)
-    rng_lims = [150,500]
+    rng_lims = [100,600]
     IPP = .0087
     NNs = 28
     NNp = 100
     simparams =   {'IPP':IPP,
                    'TimeLim':time_lim,
                    'RangeLims':rng_lims,
-                   'Pulse':pulse,
-                   'Pulsetype':'long',
+                   'Pulselength':280e-6,
+                   'Pulsetype':'long', # type of pulse can be long or barker,
+                   't_s': 20e-6,
                    'Tint':Tint,
                    'Fitinter':fittedtimeint,
                    'NNs': NNs,
@@ -35,14 +35,12 @@ def makepicklelongpulse(filepath):
                    'ambupsamp':30,
                    'species':['O+','NO+','O2+','e-'],
                    'numpoints':128,
-                   'startfile':os.path.join(filepath,'avedata.h5'),
-                   'SUMRULE': np.array([[-2,-3,-3,-4,-4,-5,-5,-6,-6,-7,-7,-8,-8,-9]
-                       ,[1,1,2,2,3,3,4,4,5,5,6,6,7,7]])}
+                   'startfile':os.path.join(filepath,'avedata.h5')}
 
     fname = os.path.join(filepath,'PFISRphantomprocspcor')
 
 
-    makepicklefile(fname+'.pickle',beamlist,radarname,simparams)
+    makeconfigfile(fname+'.pickle',beamlist,radarname,simparams)
 def makepicklebarkercode(filepath):
     beamlist = np.loadtxt('spcorbco.txt')
     beamlist.astype(np.int)
@@ -58,7 +56,8 @@ def makepicklebarkercode(filepath):
     simparams =   {'IPP':IPP,
                    'TimeLim':time_lim,
                    'RangeLims':rng_lims,
-                   'Pulse':pulse,
+                   'Pulselength':140e-6,
+                   't_s': 10e-6,
                    'Pulsetype':'barker',
                    'Tint':Tint,
                    'Fitinter':Tint,
@@ -68,11 +67,10 @@ def makepicklebarkercode(filepath):
                    'ambupsamp':30,
                    'startfile':os.path.join(filepath,'avedata.h5'),
                    'species':['O+','NO+','O2+','e-'],
-                   'numpoints':128,
-                   'SUMRULE': np.array([[0],[0]])}
+                   'numpoints':128}
 
     fname = os.path.join(filepath,'PFISRphantombarker')
-    makepicklefile(fname+'.pickle',beamlist,radarname,simparams)
+    makeconfigfile(fname+'.pickle',beamlist,radarname,simparams)
 
 def makepickleline(filepath):
     IPP = .0087
@@ -87,13 +85,13 @@ def makepickleline(filepath):
     Tint=30.0 # integrates right around 200 pulses
     fittedtimeint = 30.0 # Each incriment will be
     time_lim = 900+Tint
-    pulse = np.ones(14)
-    rng_lims = [150,500]
+    rng_lims = [100,600]
 
     simparams =   {'IPP':IPP,
                    'TimeLim':time_lim,
                    'RangeLims':rng_lims,
-                   'Pulse':pulse,
+                   'Pulselength':280e-6,
+                   't_s': 20e-6,
                    'Pulsetype':'long',
                    'Tint':Tint,
                    'Fitinter':fittedtimeint,
@@ -108,7 +106,7 @@ def makepickleline(filepath):
                        ,[1,1,2,2,3,3,4,4,5,5,6,6,7,7]])}
 
     fname = os.path.join(filepath,'PFISRphantomprocline')
-    makepicklefile(fname+'.pickle',beamlist,radarname,simparams)
+    makeconfigfile(fname+'.pickle',beamlist,radarname,simparams)
 
 def reducedata(inputdir,newcoords):
 
