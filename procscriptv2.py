@@ -37,7 +37,7 @@ def makepicklelongpulse(filepath):
                    'numpoints':128,
                    'startfile':os.path.join(filepath,'avedata.h5')}
 
-    fname = os.path.join(filepath,'PFISRphantomprocspcor')
+    fname = os.path.join(filepath,'PFISRphantomprocspcor.ini')
 
 
     makeconfigfile(fname+'.pickle',beamlist,radarname,simparams)
