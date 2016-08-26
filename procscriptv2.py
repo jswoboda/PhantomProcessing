@@ -134,9 +134,9 @@ def ke(item):
     else:
         return float('inf')
 
-def runstuff(datapath,configfile,remakedata,funcnamelist=['spectrums','radardata','fitting']):
+def runstuff(datapath,configfile,remakedata,funcnamelist=['spectrums','radardata','fitting'],fittimes=[]):
     
-    runsim.main(funcnamelist,datapath,configfile,remakedata)
+    runsim.main(funcnamelist,datapath,configfile,remakedata,fittimes)
     if "fitting" in funcnamelist:
         fit2geodata(os.path.join(datapath,'Fitted','fitteddata.h5'))
     
@@ -150,13 +150,12 @@ if __name__== '__main__':
     p = ArgumentParser(description=descr)
     p.add_argument('-t','--times',help='Times, as locations in the output time vector array that will be fit.',nargs='+',default=[])
     p.add_argument('-i','--idir',help='Base directory',default='all')
-    p.add_argument('-c','--config',help='Config file for simlation',default = 'planeproc2_stat.ini')
+    p.add_argument('-c','--config',help='Config file for simlation',default = 'PFISRphantomprocspcor.ini')
     p.add_argument('-r ','--re',help='Remake data True or False.',type=bool,default=False)
     p.add_argument('-f','--funclist',help='Functions to be uses',nargs='+',default=['spectrums','radardata','fitting'])#action='append',dest='collection',default=['spectrums','radardata','fitting','analysis'])
     
     args = p.parse_args()
     basedir = args.idir
-    curpath = args.path
     configfile = args.config
     remakealldata = args.re
     funcnamelist = args.funclist
@@ -166,4 +165,4 @@ if __name__== '__main__':
         configfile= os.path.join(basedir,configfile)
         assert os.path.isfile(configfile), 'Config file does not exist.'
         
-    runstuff(basedir,configfile,remakealldata,funcnamelist)
+    runstuff(basedir,configfile,remakealldata,funcnamelist,fittimes)
