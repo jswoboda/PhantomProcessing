@@ -40,7 +40,7 @@ def makepicklelongpulse(filepath):
     fname = os.path.join(filepath,'PFISRphantomprocspcor.ini')
 
 
-    makeconfigfile(fname+'.pickle',beamlist,radarname,simparams)
+    makeconfigfile(fname+'.ini',beamlist,radarname,simparams)
 def makepicklebarkercode(filepath):
     beamlist = np.loadtxt('spcorbco.txt')
     beamlist.astype(np.int)
@@ -101,9 +101,7 @@ def makepickleline(filepath):
                    'ambupsamp':30,
                    'species':['O+','NO+','O2+','e-'],
                    'numpoints':128,
-                   'startfile':os.path.join(filepath,'avedata.h5'),
-                   'SUMRULE': np.array([[-2,-3,-3,-4,-4,-5,-5,-6,-6,-7,-7,-8,-8,-9]
-                       ,[1,1,2,2,3,3,4,4,5,5,6,6,7,7]])}
+                   'startfile':os.path.join(filepath,'avedata.h5')}
 
     fname = os.path.join(filepath,'PFISRphantomprocline')
     makeconfigfile(fname+'.pickle',beamlist,radarname,simparams)
@@ -136,7 +134,36 @@ def ke(item):
     else:
         return float('inf')
 
-def runstuff(datapath,picklefilename):
-    funcnamelist=['spectrums','radardata','fitting']
-    runsim.main(funcnamelist,datapath,os.path.join(datapath,picklefilename),True)
-    fit2geodata(os.path.join(datapath,'Fitted','fitteddata.h5'))
+def runstuff(datapath,configfile,remakedata,funcnamelist=['spectrums','radardata','fitting']):
+    
+    runsim.main(funcnamelist,datapath,configfile,remakedata)
+    if "fitting" in funcnamelist:
+        fit2geodata(os.path.join(datapath,'Fitted','fitteddata.h5'))
+    
+if __name__== '__main__':
+
+    from argparse import ArgumentParser
+    descr = '''
+             This script will perform the basic run est for ISR sim.
+            '''
+    curpath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    p = ArgumentParser(description=descr)
+    p.add_argument('-t','--times',help='Times, as locations in the output time vector array that will be fit.',nargs='+',default=[])
+    p.add_argument('-i','--idir',help='Base directory',default='all')
+    p.add_argument('-c','--config',help='Config file for simlation',default = 'planeproc2_stat.ini')
+    p.add_argument('-r ','--re',help='Remake data True or False.',type=bool,default=False)
+    p.add_argument('-f','--funclist',help='Functions to be uses',nargs='+',default=['spectrums','radardata','fitting'])#action='append',dest='collection',default=['spectrums','radardata','fitting','analysis'])
+    
+    args = p.parse_args()
+    basedir = args.idir
+    curpath = args.path
+    configfile = args.config
+    remakealldata = args.re
+    funcnamelist = args.funclist
+    fittimes = args.times
+
+    if not os.path.isfile(configfile):
+        configfile= os.path.join(basedir,configfile)
+        assert os.path.isfile(configfile), 'Config file does not exist.'
+        
+    runstuff(basedir,configfile,remakealldata,funcnamelist)
