@@ -160,6 +160,7 @@ if __name__== '__main__':
     remakealldata = args.re
     funcnamelist = args.funclist
     fittimes = args.times
+    fittimes= [int(i) for i in fittimes]
 
     if not os.path.isfile(configfile):
         configfile= os.path.join(basedir,configfile)
