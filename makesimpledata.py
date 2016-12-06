@@ -13,7 +13,7 @@ Created on Mon Apr  6 15:07:16 2015
 """
 import os, inspect
 import pdb
-from RadarDataSim.IonoContainer import IonoContainer
+from SimISR.IonoContainer import IonoContainer
 import scipy as sp
 
 def main(curpath):

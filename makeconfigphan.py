@@ -6,7 +6,7 @@ Created on Fri Apr 24 13:13:39 2015
 """
 
 import numpy as np
-from RadarDataSim.makeConfigFiles import makepicklefile
+from SimISR.makeConfigFiles import makepicklefile
 
 def main():
 

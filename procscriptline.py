@@ -18,15 +18,15 @@ from matplotlib import rc
 import matplotlib.pylab as plt
 import tables
 # My modules
-from RadarDataSim.IonoContainer import IonoContainer
-from RadarDataSim.radarData import RadarDataFile
-import RadarDataSim.specfunctions as specfuncs
-import RadarDataSim.const.sensorConstants as sensconst
-from RadarDataSim.const.physConstants import v_C_0, v_Boltz
+from SimISR.IonoContainer import IonoContainer
+from SimISR.radarData import RadarDataFile
+import SimISR.specfunctions as specfuncs
+import SimISR.const.sensorConstants as sensconst
+from SimISR.const.physConstants import v_C_0, v_Boltz
 from beamtools.bcotools import getangles
-from RadarDataSim.utilFunctions import make_amb
-from RadarDataSim.specfunctions import ISRSfitfunction
-from RadarDataSim.fitterMethodGen import Fitterionoconainer
+from SimISR.utilFunctions import make_amb
+from SimISR.specfunctions import ISRSfitfunction
+from SimISR.fitterMethodGen import Fitterionoconainer
 
 def makespectrums(inputdir,outputdir,optinputs):
 

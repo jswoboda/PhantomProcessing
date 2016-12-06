@@ -15,12 +15,12 @@ import pdb
 import scipy as sp
 import tables
 # My modules
-from RadarDataSim.IonoContainer import IonoContainer
-from RadarDataSim.radarData import RadarDataFile
-import RadarDataSim.specfunctions as specfuncs
-from RadarDataSim.specfunctions import ISRSfitfunction
-from RadarDataSim.fitterMethodGen import Fitterionoconainer
-from RadarDataSim.makeConfigFiles import readconfigfile
+from SimISR.IonoContainer import IonoContainer
+from SimISR.radarData import RadarDataFile
+import SimISR.specfunctions as specfuncs
+from SimISR.specfunctions import ISRSfitfunction
+from SimISR.fitterMethodGen import Fitterionoconainer
+from SimISR.makeConfigFiles import readconfigfile
 from turn2geodata import fit2geodata
 
 #%% Make spectrums

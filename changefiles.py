@@ -7,7 +7,7 @@ Created on Wed Apr 15 12:13:27 2015
 
 import os, glob
 import pdb
-from RadarDataSim.IonoContainer import IonoContainer
+from SimISR.IonoContainer import IonoContainer
 from GeoData.GeoData import GeoData
 from GeoData.utilityfuncs import readIono
 

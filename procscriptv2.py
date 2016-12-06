@@ -4,9 +4,9 @@
 import os, inspect, glob,pdb
 import scipy as sp
 import numpy as np
-from RadarDataSim.utilFunctions import makeconfigfile
-from RadarDataSim.IonoContainer import IonoContainer
-import RadarDataSim.runsim as runsim
+from SimISR.utilFunctions import makeconfigfile
+from SimISR.IonoContainer import IonoContainer
+import SimISR.runsim as runsim
 from turn2geodata import fit2geodata
 def makepicklelongpulse(filepath):
     beamlist = np.loadtxt('spcorbco.txt')
